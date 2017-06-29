@@ -1,0 +1,19 @@
+[package]
+name = "exonum-bitcoinrpc"
+version = "0.1.0"
+authors = ["Aleksei Sidorov <aleksei.sidorov@xdev.re>"]
+
+[dependencies]
+serde = "1.0"
+serde_derive = "1.0"
+serde_json = "1.0"
+log = "0.3"
+bitcoin = "0.9.0"
+hex = "0.2"
+env_logger = "0.3"
+
+[dependencies.exonum-jsonrpc-v1]
+git = "ssh://git@github.com/exonum/jsonrpc-v1.git"
+rev="ae2150bf01906fd73b02d914b00f461f1d610279"
+version="0.2"
+
