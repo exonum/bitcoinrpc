@@ -1,4 +1,4 @@
-extern crate jsonrpc_v1;
+extern crate exonum_jsonrpc;
 #[macro_use]
 extern crate serde_derive;
 extern crate serde;
@@ -12,8 +12,8 @@ use std::collections::BTreeMap;
 use serde::Deserialize;
 use serde_json::value::Value;
 
-use jsonrpc_v1::client::Client as RpcClient;
-pub use jsonrpc_v1::error::Error as RpcError;
+use exonum_jsonrpc::client::Client as RpcClient;
+pub use exonum_jsonrpc::error::Error as RpcError;
 
 #[derive(Debug)]
 pub enum Error {
@@ -38,7 +38,7 @@ impl Error {
 impl From<RpcError> for Error {
     fn from(e: RpcError) -> Error {
         match e {
-            jsonrpc_v1::Error::Rpc(value) => {
+            exonum_jsonrpc::Error::Rpc(value) => {
                 if let Some(code) = value.pointer("/code").and_then(Value::as_i64) {
                     let msg = value
                         .pointer("/message")
