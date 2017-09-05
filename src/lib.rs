@@ -431,4 +431,12 @@ impl Client {
     pub fn stop(&self) -> Result<String> {
         self.request("stop", vec![])
     }
+
+    pub fn getreceivedbyaddress(&self, addr: &str, minconf: u64) -> Result<f64> {
+        let params = json!([addr, minconf])
+            .as_array()
+            .cloned()
+            .unwrap();
+        self.request("getreceivedbyaddress", params)
+    }
 }
