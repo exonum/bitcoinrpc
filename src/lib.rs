@@ -208,6 +208,8 @@ pub struct UnspentTransactionInfo {
     pub account: String,
     #[serde(rename = "scriptPubKey")]
     pub script_pubkey: String,
+    #[serde(rename = "redeemScript")]
+    pub redeem_script: Option<String>,
     pub amount: f64,
     pub confirmations: u64,
     pub spendable: bool,
