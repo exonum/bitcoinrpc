@@ -204,12 +204,14 @@ pub struct RawTransactionInfo {
 pub struct UnspentTransactionInfo {
     pub txid: String,
     pub vout: u32,
-    pub confirmations: u64,
+    pub address: String,
+    pub account: String,
     #[serde(rename = "scriptPubKey")]
     pub script_pubkey: String,
-    pub amount: f64,
     #[serde(rename = "redeemScript")]
     pub redeem_script: Option<String>,
+    pub amount: f64,
+    pub confirmations: u64,
     pub spendable: bool,
     pub solvable: bool,
 }
