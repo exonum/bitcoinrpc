@@ -264,7 +264,8 @@ struct RpcRequest {
 
 impl Client {
     pub fn new<S>(url: S, user: Option<String>, password: Option<String>) -> Client
-        where S: Into<String>
+    where
+        S: Into<String>,
     {
         Client { inner: RpcClient::new(url.into(), user.map(Into::into), password.map(Into::into)) }
     }
@@ -280,16 +281,19 @@ impl Client {
     }
 
     fn request<T>(&self, method: &str, params: Params) -> Result<T>
-        where for<'de> T: Deserialize<'de>
+    where
+        for<'de> T: Deserialize<'de>,
     {
         let request = self.inner.build_request(method.into(), params);
         let response = self.inner.send_request(&request)?;
-        trace!("{:#?}",
-               RpcRequest {
-                   method: request.method.clone(),
-                   params: request.params.clone(),
-                   response: response.clone().into_result::<Value>().map_err(Error::from),
-               });
+        trace!(
+            "{:#?}",
+            RpcRequest {
+                method: request.method.clone(),
+                params: request.params.clone(),
+                response: response.clone().into_result::<Value>().map_err(Error::from),
+            }
+        );
         response.into_result::<T>().map_err(Error::from)
     }
 }
@@ -311,8 +315,10 @@ impl Client {
         self.request("createmultisig", vec![n, addrs])
     }
     pub fn sendtoaddress(&self, addr: &str, amount: &str) -> Result<String> {
-        let params = vec![serde_json::to_value(addr).unwrap(),
-                          serde_json::to_value(amount).unwrap()];
+        let params = vec![
+            serde_json::to_value(addr).unwrap(),
+            serde_json::to_value(amount).unwrap(),
+        ];
         self.request("sendtoaddress", params)
     }
     pub fn getrawtransaction(&self, txid: &str) -> Result<String> {
@@ -323,19 +329,20 @@ impl Client {
         let params = json!([txid, 1]).as_array().cloned().unwrap();
         self.request("getrawtransaction", params)
     }
-    pub fn createrawtransaction<T, O>(&self,
-                                      transactions: T,
-                                      outputs: O,
-                                      data: Option<String>)
-                                      -> Result<String>
-        where T: AsRef<[TransactionInput]>,
-              O: AsRef<[TransactionOutput]>
+    pub fn createrawtransaction<T, O>(
+        &self,
+        transactions: T,
+        outputs: O,
+        data: Option<String>,
+    ) -> Result<String>
+    where
+        T: AsRef<[TransactionInput]>,
+        O: AsRef<[TransactionOutput]>,
     {
         let mut map = BTreeMap::new();
-        map.extend(outputs
-                       .as_ref()
-                       .iter()
-                       .map(|x| (x.address.clone(), x.value.clone())));
+        map.extend(outputs.as_ref().iter().map(|x| {
+            (x.address.clone(), x.value.clone())
+        }));
         if let Some(data) = data {
             map.insert("data".into(), data);
         }
@@ -350,13 +357,15 @@ impl Client {
         let params = json!([pub_key]).as_array().cloned().unwrap();
         self.request("dumpprivkey", params)
     }
-    pub fn signrawtransaction<O, K>(&self,
-                                    txhex: &str,
-                                    outputs: O,
-                                    priv_keys: K)
-                                    -> Result<SignTxOutput>
-        where O: AsRef<[DependentOutput]>,
-              K: AsRef<[String]>
+    pub fn signrawtransaction<O, K>(
+        &self,
+        txhex: &str,
+        outputs: O,
+        priv_keys: K,
+    ) -> Result<SignTxOutput>
+    where
+        O: AsRef<[DependentOutput]>,
+        K: AsRef<[String]>,
     {
         let params = json!([txhex, outputs.as_ref(), priv_keys.as_ref()])
             .as_array()
@@ -365,33 +374,41 @@ impl Client {
         self.request("signrawtransaction", params)
     }
     pub fn sendrawtransaction(&self, txhex: &str) -> Result<String> {
-        self.request("sendrawtransaction",
-                     vec![serde_json::to_value(txhex).unwrap()])
+        self.request(
+            "sendrawtransaction",
+            vec![serde_json::to_value(txhex).unwrap()],
+        )
     }
     pub fn decoderawtransaction(&self, txhex: &str) -> Result<RawTransactionInfo> {
-        self.request("decoderawtransaction",
-                     vec![serde_json::to_value(txhex).unwrap()])
+        self.request(
+            "decoderawtransaction",
+            vec![serde_json::to_value(txhex).unwrap()],
+        )
     }
     pub fn addwitnessaddress(&self, addr: &str) -> Result<String> {
-        self.request("addwitnessaddress",
-                     vec![serde_json::to_value(addr).unwrap()])
+        self.request(
+            "addwitnessaddress",
+            vec![serde_json::to_value(addr).unwrap()],
+        )
     }
-    pub fn listtransactions(&self,
-                            count: u32,
-                            from: u32,
-                            include_watch_only: bool)
-                            -> Result<Vec<TransactionInfo>> {
+    pub fn listtransactions(
+        &self,
+        count: u32,
+        from: u32,
+        include_watch_only: bool,
+    ) -> Result<Vec<TransactionInfo>> {
         let params = json!(["*", count, from, include_watch_only])
             .as_array()
             .cloned()
             .unwrap();
         self.request("listtransactions", params)
     }
-    pub fn listunspent<'a, V: AsRef<[&'a str]>>(&self,
-                                                min_confirmations: u32,
-                                                max_confirmations: u32,
-                                                addresses: V)
-                                                -> Result<Vec<UnspentTransactionInfo>> {
+    pub fn listunspent<'a, V: AsRef<[&'a str]>>(
+        &self,
+        min_confirmations: u32,
+        max_confirmations: u32,
+        addresses: V,
+    ) -> Result<Vec<UnspentTransactionInfo>> {
         let params = json!([min_confirmations, max_confirmations, addresses.as_ref()])
             .as_array()
             .cloned()
@@ -418,11 +435,12 @@ impl Client {
         self.request("generate", params)
     }
 
-    pub fn generatetoaddress(&self,
-                             nblocks: u64,
-                             addr: &str,
-                             maxtries: u64)
-                             -> Result<Vec<String>> {
+    pub fn generatetoaddress(
+        &self,
+        nblocks: u64,
+        addr: &str,
+        maxtries: u64,
+    ) -> Result<Vec<String>> {
         let params = json!([nblocks, addr, maxtries])
             .as_array()
             .cloned()
@@ -435,10 +453,7 @@ impl Client {
     }
 
     pub fn getreceivedbyaddress(&self, addr: &str, minconf: u64) -> Result<f64> {
-        let params = json!([addr, minconf])
-            .as_array()
-            .cloned()
-            .unwrap();
+        let params = json!([addr, minconf]).as_array().cloned().unwrap();
         self.request("getreceivedbyaddress", params)
     }
 }
