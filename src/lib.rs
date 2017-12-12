@@ -9,7 +9,7 @@ extern crate log;
 
 use std::collections::BTreeMap;
 
-use serde::Deserialize;
+use serde::{Serialize, Deserialize};
 use serde_json::value::Value;
 
 use exonum_jsonrpc::client::Client as RpcClient;
@@ -303,17 +303,21 @@ impl Client {
     pub fn getinfo(&self) -> Result<Info> {
         self.request("getinfo", Vec::new())
     }
+
     pub fn getnewaddress(&self, account: &str) -> Result<String> {
         self.request("getnewaddress", vec![Value::String(account.to_owned())])
     }
+
     pub fn validateaddress(&self, addr: &str) -> Result<AddressInfo> {
         self.request("validateaddress", vec![Value::String(addr.to_owned())])
     }
+
     pub fn createmultisig<V: AsRef<[String]>>(&self, signs: u8, addrs: V) -> Result<MultiSig> {
         let n = serde_json::to_value(signs).unwrap();
         let addrs = serde_json::to_value(addrs.as_ref()).unwrap();
         self.request("createmultisig", vec![n, addrs])
     }
+
     pub fn sendtoaddress(&self, addr: &str, amount: &str) -> Result<String> {
         let params = vec![
             serde_json::to_value(addr).unwrap(),
@@ -321,14 +325,17 @@ impl Client {
         ];
         self.request("sendtoaddress", params)
     }
+
     pub fn getrawtransaction(&self, txid: &str) -> Result<String> {
         let params = json!([txid, 0]).as_array().cloned().unwrap();
         self.request("getrawtransaction", params)
     }
+
     pub fn getrawtransaction_verbose(&self, txid: &str) -> Result<RawTransactionInfo> {
         let params = json!([txid, 1]).as_array().cloned().unwrap();
         self.request("getrawtransaction", params)
     }
+
     pub fn createrawtransaction<T, O>(
         &self,
         transactions: T,
@@ -353,10 +360,12 @@ impl Client {
             .unwrap();
         self.request("createrawtransaction", params)
     }
+
     pub fn dumpprivkey(&self, pub_key: &str) -> Result<String> {
         let params = json!([pub_key]).as_array().cloned().unwrap();
         self.request("dumpprivkey", params)
     }
+
     pub fn signrawtransaction<O, K>(
         &self,
         txhex: &str,
@@ -373,24 +382,28 @@ impl Client {
             .unwrap();
         self.request("signrawtransaction", params)
     }
+
     pub fn sendrawtransaction(&self, txhex: &str) -> Result<String> {
         self.request(
             "sendrawtransaction",
             vec![serde_json::to_value(txhex).unwrap()],
         )
     }
+
     pub fn decoderawtransaction(&self, txhex: &str) -> Result<RawTransactionInfo> {
         self.request(
             "decoderawtransaction",
             vec![serde_json::to_value(txhex).unwrap()],
         )
     }
+
     pub fn addwitnessaddress(&self, addr: &str) -> Result<String> {
         self.request(
             "addwitnessaddress",
             vec![serde_json::to_value(addr).unwrap()],
         )
     }
+
     pub fn listtransactions(
         &self,
         count: u32,
@@ -403,19 +416,20 @@ impl Client {
             .unwrap();
         self.request("listtransactions", params)
     }
-    pub fn listunspent<'a, V: AsRef<[&'a str]>>(
+
+    pub fn listunspent<V: AsRef<str> + Serialize>(
         &self,
         min_confirmations: u32,
         max_confirmations: u32,
-        addresses: V,
+        addresses: &[V],
     ) -> Result<Vec<UnspentTransactionInfo>> {
-        let params = json!([min_confirmations, max_confirmations, addresses.as_ref()])
+        let params = json!([min_confirmations, max_confirmations, addresses])
             .as_array()
             .cloned()
             .unwrap();
         self.request("listunspent", params)
-
     }
+
     pub fn importaddress(&self, addr: &str, label: &str, rescan: bool, p2sh: bool) -> Result<()> {
         let params = json!([addr, label, rescan, p2sh])
             .as_array()
