@@ -58,7 +58,7 @@ impl From<RpcError> for Error {
                 }
                 Error::Other(RpcError::Rpc(value))
             }
-            e @ _ => Error::Other(e),
+            e => Error::Other(e),
         }
     }
 }
@@ -66,9 +66,9 @@ impl From<RpcError> for Error {
 impl ::std::fmt::Display for Error {
     fn fmt(&self, f: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
         match *self {
-            Error::NoInformation(ref msg) => write!(f, "{}", msg),
-            Error::Memory(ref msg) => write!(f, "{}", msg),
-            Error::TransactionRejected(ref msg) => write!(f, "{}", msg),
+            Error::NoInformation(ref msg) |
+            Error::Memory(ref msg) |
+            Error::TransactionRejected(ref msg) |
             Error::TransactionIncorrect(ref msg) => write!(f, "{}", msg),
             Error::InsufficientFunds => write!(f, "Insufficient funds"),
             Error::TransactionAlreadyInChain => write!(f, "Transaction already in chain"),
@@ -80,10 +80,10 @@ impl ::std::fmt::Display for Error {
 impl ::std::error::Error for Error {
     fn description(&self) -> &str {
         match *self {
-            Error::NoInformation(ref msg) => &msg,
-            Error::Memory(ref msg) => &msg,
-            Error::TransactionRejected(ref msg) => &msg,
-            Error::TransactionIncorrect(ref msg) => &msg,
+            Error::NoInformation(ref msg) |
+            Error::Memory(ref msg) |
+            Error::TransactionRejected(ref msg) |
+            Error::TransactionIncorrect(ref msg) => msg,
             Error::InsufficientFunds => "Insufficient funds",
             Error::TransactionAlreadyInChain => "Transaction already in chain",
             Error::Other(_) => "Rpc error",
@@ -438,7 +438,7 @@ impl Client {
         // special case for decode {"result":null}
         let r: Result<Option<bool>> = self.request("importaddress", params);
         match r {
-            Ok(_) => Ok(()),
+            Ok(_) |
             Err(Error::Other(RpcError::NoErrorOrResult)) => Ok(()),
             Err(e) => Err(e),
         }
