@@ -470,4 +470,28 @@ impl Client {
         let params = json!([addr, minconf]).as_array().cloned().unwrap();
         self.request("getreceivedbyaddress", params)
     }
+
+    pub fn getblockcount(&self) -> Result<u64> {
+        self.request("getblockcount", vec![])
+    }
+
+    pub fn getbestblockhash(&self) -> Result<String> {
+        self.request("getbestblockhash", vec![])
+    }
+
+    pub fn getblockhash(&self, height: u64) -> Result<String> {
+        let params = json!([height])
+            .as_array()
+            .cloned()
+            .unwrap();
+        self.request("getblockhash", params)
+    }
+
+    pub fn getblock<S: AsRef<str> + Serialize>(&self, hash: S) -> Result<String> {
+        let params = json!([hash.as_ref(), 0])
+            .as_array()
+            .cloned()
+            .unwrap();
+        self.request("getblock", params)
+    }
 }
