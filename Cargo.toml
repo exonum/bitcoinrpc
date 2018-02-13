@@ -10,5 +10,5 @@ license = "Apache-2.0"
 serde = "1.0.0"
 serde_derive = "1.0.0"
 serde_json = "1.0.0"
-log = "0.3.0"
-exonum_jsonrpc = { git = "https://github.com/exonum/jsonrpc.git", rev = "86e9ce9" }
+log = "0.4.0"
+exonum_jsonrpc = "0.3.0"
