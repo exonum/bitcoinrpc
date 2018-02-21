@@ -6,8 +6,12 @@ extern crate serde;
 extern crate serde_json;
 #[macro_use]
 extern crate log;
+extern crate failure;
+#[macro_use] 
+extern crate failure_derive;
 
 use std::collections::BTreeMap;
+use std::io;
 
 use serde::{Serialize, Deserialize};
 use serde_json::value::Value;
@@ -15,15 +19,24 @@ use serde_json::value::Value;
 use exonum_jsonrpc::client::Client as RpcClient;
 pub use exonum_jsonrpc::error::Error as RpcError;
 
-#[derive(Debug)]
+#[derive(Fail, Debug)]
 pub enum Error {
+    #[fail(display = "No information: {}", _0)]
     NoInformation(String),
+    #[fail(display = "Memory pool error: {}", _0)]
     Memory(String),
+    #[fail(display = "Transaction is incorrect: {}", _0)]
     TransactionIncorrect(String),
+    #[fail(display = "Transaction rejected: {}", _0)]
     TransactionRejected(String),
+    #[fail(display = "Insufficient funds")]
     InsufficientFunds,
+    #[fail(display = "Transaction already in chain")]
     TransactionAlreadyInChain,
-    Other(RpcError),
+    #[fail(display = "Other rpc error: {}", _0)]
+    Rpc(RpcError),
+    #[fail(display = "Other error: {}", _0)]
+    Other(io::Error)
 }
 
 pub type Result<T> = ::std::result::Result<T, Error>;
@@ -56,44 +69,9 @@ impl From<RpcError> for Error {
                         _ => {}
                     }
                 }
-                Error::Other(RpcError::Rpc(value))
+                Error::Rpc(RpcError::Rpc(value))
             }
-            e => Error::Other(e),
-        }
-    }
-}
-
-impl ::std::fmt::Display for Error {
-    fn fmt(&self, f: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
-        match *self {
-            Error::NoInformation(ref msg) |
-            Error::Memory(ref msg) |
-            Error::TransactionRejected(ref msg) |
-            Error::TransactionIncorrect(ref msg) => write!(f, "{}", msg),
-            Error::InsufficientFunds => write!(f, "Insufficient funds"),
-            Error::TransactionAlreadyInChain => write!(f, "Transaction already in chain"),
-            Error::Other(ref e) => write!(f, "JsonRpc error: {}", e),
-        }
-    }
-}
-
-impl ::std::error::Error for Error {
-    fn description(&self) -> &str {
-        match *self {
-            Error::NoInformation(ref msg) |
-            Error::Memory(ref msg) |
-            Error::TransactionRejected(ref msg) |
-            Error::TransactionIncorrect(ref msg) => msg,
-            Error::InsufficientFunds => "Insufficient funds",
-            Error::TransactionAlreadyInChain => "Transaction already in chain",
-            Error::Other(_) => "Rpc error",
-        }
-    }
-
-    fn cause(&self) -> Option<&::std::error::Error> {
-        match *self {
-            Error::Other(ref e) => Some(e),
-            _ => None,
+            e => Error::Rpc(e),
         }
     }
 }
@@ -439,7 +417,7 @@ impl Client {
         let r: Result<Option<bool>> = self.request("importaddress", params);
         match r {
             Ok(_) |
-            Err(Error::Other(RpcError::NoErrorOrResult)) => Ok(()),
+            Err(Error::Rpc(RpcError::NoErrorOrResult)) => Ok(()),
             Err(e) => Err(e),
         }
     }
