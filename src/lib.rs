@@ -76,6 +76,12 @@ impl From<RpcError> for Error {
     }
 }
 
+impl From<io::Error> for Error {
+    fn from(e: io::Error) -> Self {
+        Error::Other(e)
+    }
+}
+
 pub struct Client {
     inner: RpcClient,
 }
