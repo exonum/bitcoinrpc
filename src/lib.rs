@@ -35,9 +35,9 @@ pub enum Error {
     InsufficientFunds,
     #[display(fmt = "Transaction already in chain.")]
     TransactionAlreadyInChain,
-    #[display(fmt = "Rpc error. {}", _0)]
+    #[display(fmt = "{}", _0)]
     Rpc(RpcError),
-    #[display(fmt = "Other. {}", _0)]
+    #[display(fmt = "{}", _0)]
     Other(io::Error)
 }
 
