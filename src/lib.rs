@@ -9,6 +9,8 @@ extern crate log;
 extern crate failure;
 #[macro_use] 
 extern crate failure_derive;
+#[macro_use] 
+extern crate display_derive;
 
 use std::collections::BTreeMap;
 use std::io;
@@ -19,23 +21,23 @@ use serde_json::value::Value;
 use exonum_jsonrpc::client::Client as RpcClient;
 pub use exonum_jsonrpc::error::Error as RpcError;
 
-#[derive(Fail, Debug)]
+#[derive(Fail, Debug, Display)]
 pub enum Error {
-    #[fail(display = "No information: {}", _0)]
+    #[display(fmt = "No information. {}", _0)]
     NoInformation(String),
-    #[fail(display = "Memory pool error: {}", _0)]
+    #[display(fmt = "Memory pool error. {}", _0)]
     Memory(String),
-    #[fail(display = "Transaction is incorrect: {}", _0)]
+    #[display(fmt = "Transaction is incorrect. {}", _0)]
     TransactionIncorrect(String),
-    #[fail(display = "Transaction rejected: {}", _0)]
+    #[display(fmt = "Transaction rejected. {}", _0)]
     TransactionRejected(String),
-    #[fail(display = "Insufficient funds")]
+    #[display(fmt = "Insufficient funds.")]
     InsufficientFunds,
-    #[fail(display = "Transaction already in chain")]
+    #[display(fmt = "Transaction already in chain.")]
     TransactionAlreadyInChain,
-    #[fail(display = "Other rpc error: {}", _0)]
+    #[display(fmt = "Rpc error. {}", _0)]
     Rpc(RpcError),
-    #[fail(display = "Other error: {}", _0)]
+    #[display(fmt = "Other. {}", _0)]
     Other(io::Error)
 }
 

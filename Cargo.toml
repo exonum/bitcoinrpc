@@ -14,3 +14,4 @@ log = "0.4.0"
 exonum_jsonrpc = { git = "https://github.com/exonum/jsonrpc" }
 failure = "0.1.1"
 failure_derive = "0.1.1"
+display_derive = "0.0.0"
