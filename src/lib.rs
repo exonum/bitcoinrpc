@@ -124,7 +124,7 @@ pub struct AddressInfo {
     pub isscript: bool,
     pub pubkey: String,
     pub iscompressed: bool,
-    pub account: String,
+    pub account: Option<String>,
     pub hdkeypath: String,
     pub hdmasterkeyid: String,
 }
@@ -290,8 +290,8 @@ impl Client {
         self.request("getinfo", Vec::new())
     }
 
-    pub fn getnewaddress(&self, account: &str) -> Result<String> {
-        self.request("getnewaddress", vec![Value::String(account.to_owned())])
+    pub fn getnewaddress(&self) -> Result<String> {
+        self.request("getnewaddress", vec![])
     }
 
     pub fn validateaddress(&self, addr: &str) -> Result<AddressInfo> {
